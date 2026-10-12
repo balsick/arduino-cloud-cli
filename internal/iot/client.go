@@ -515,6 +515,23 @@ func (cl *Client) DashboardShow(ctx context.Context, id string) (*iotclient.Ardu
 	return dashboard, nil
 }
 
+// DashboardUpdate replaces an existing dashboard on Arduino IoT Cloud,
+// keeping its ID.
+func (cl *Client) DashboardUpdate(ctx context.Context, id string, dashboard *iotclient.Dashboardv3) (*iotclient.ArduinoDashboardv3, error) {
+	ctx, err := ctxWithToken(ctx, cl.token)
+	if err != nil {
+		return nil, err
+	}
+
+	req := cl.api.DashboardsV3API.DashboardsV3Update(ctx, id)
+	req = req.Dashboardv3(*dashboard)
+	updated, _, err := cl.api.DashboardsV3API.DashboardsV3UpdateExecute(req)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", "updating dashboard", errorDetail(err))
+	}
+	return updated, nil
+}
+
 // DashboardList returns a list of dashboards on Arduino IoT Cloud.
 func (cl *Client) DashboardList(ctx context.Context) ([]iotclient.ArduinoDashboardv3, error) {
 	ctx, err := ctxWithToken(ctx, cl.token)

@@ -393,6 +393,64 @@ Create a dashboard: dashboards can be created only starting from a template. Sup
 arduino-cloud-cli dashboard create --name <dashboardName> --template <template.(json|yaml)> --override <thing-0>=<actualThingID>,<thing-1>=<otherActualThingID>
 ```
 
+### Edit widgets and pages of a dashboard
+
+The following commands change an existing dashboard in place, without templates: the dashboard keeps its ID, so links and sharing keep working. Each command reads the dashboard, applies the change and saves it back, so avoid editing the same dashboard from the web editor at the same time.
+
+#### Widgets
+
+List the widgets of a dashboard, optionally only those of a page, with their ID, page, layout and variables:
+
+```bash
+arduino-cloud-cli dashboard list-widgets --id <dashboardID> [--page-id <pageID>]
+```
+
+Add a widget. `--type` is case-sensitive (e.g. `Value`, `Gauge`, `Percentage`, `LED`, `Status`, `Chart`, `Advanced Chart`, `Switch`, `Push Button`, `Slider`, `Stepper`, `Value Selector`, `Messenger`, `Color`, `Sticky Note`, `Link`, `Image`). Variables are passed as `<thingID>:<variable_name>` and `--variable` can be repeated. Options are a JSON object. Without size flags the widget gets the default size of its type; without position flags it is placed below the widgets of the page. The page defaults to the first one:
+
+```bash
+arduino-cloud-cli dashboard create-widget --id <dashboardID> --type Gauge --name Temperature --variable <thingID>:temperature --options '{"min": 0, "max": 50}' [--page-id <pageID>] [--x <col> --y <row> --width <w> --height <h>] [--x-mobile <col> --y-mobile <row> --width-mobile <w> --height-mobile <h>]
+```
+
+The desktop grid has 24 columns, the mobile grid 8.
+
+Change a widget: only the passed flags are changed. Options are merged into the current ones, and a `null` value removes an option. `--variable` replaces the linked variables. `--page-id` moves the widget to another page, below its widgets unless a position is passed:
+
+```bash
+arduino-cloud-cli dashboard update-widget --id <dashboardID> --widget-id <widgetID> [--name <name>] [--page-id <pageID>] [--options '{"max": 80}'] [--variable <thingID>:<variable_name>] [layout flags]
+```
+
+Delete a widget:
+
+```bash
+arduino-cloud-cli dashboard delete-widget --id <dashboardID> --widget-id <widgetID>
+```
+
+#### Pages
+
+List the pages of a dashboard, with their ID and number of widgets:
+
+```bash
+arduino-cloud-cli dashboard list-pages --id <dashboardID>
+```
+
+Add a page, by default as the last one. When a dashboard has no pages yet, its widgets are moved to the new page:
+
+```bash
+arduino-cloud-cli dashboard create-page --id <dashboardID> --name <pageName> [--icon <icon>] [--position <n>]
+```
+
+Rename, move or change the icon of a page (`--position` is 0-based):
+
+```bash
+arduino-cloud-cli dashboard update-page --id <dashboardID> --page-id <pageID> [--name <pageName>] [--icon <icon>] [--position <n>]
+```
+
+Delete a page. If it contains widgets, they must either be moved to another page, below its widgets, or deleted. The last page of a dashboard cannot be deleted:
+
+```bash
+arduino-cloud-cli dashboard delete-page --id <dashboardID> --page-id <pageID> [--move-widgets-to <otherPageID> | --delete-widgets]
+```
+
 ## Custom templates
 
 ### List custom templates
